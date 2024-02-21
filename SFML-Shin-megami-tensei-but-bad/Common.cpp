@@ -111,15 +111,19 @@ void Game::run() {
                 for (int i = 0; i <= 90; ++i) { // assuming angles are in degrees
                     float angleInRadians = i * (M_PI / 180.0); // convert degrees to radians
 
+
+                    float distance = 0;
+                    sf::Vector2f interceptToDraw;
                     for (int x = 0; x < transformedPoints.size() - 1; x++) {
                         playerPos;
                         sf::Vector2f playerRayEnd;
+                        playerRayEnd.x = (cosf(angle + angleInRadians) * 1000) + playerPos.x;
+                        playerRayEnd.y = (sinf(angle + angleInRadians) * 1000) + playerPos.y;
                         sf::VertexArray objToDraw(sf::LinesStrip, 2);
                         objToDraw[0] = playerPos;
                         objToDraw[0].color = sf::Color::Black;
 
-                        playerRayEnd.x = (cosf(angle+ angleInRadians) * 1000) + playerPos.x;
-                        playerRayEnd.y = (sinf(angle+ angleInRadians) * 1000) + playerPos.y;
+
                         objToDraw[1] = playerRayEnd;
                         objToDraw[1].color = sf::Color::Black;
 
@@ -130,31 +134,49 @@ void Game::run() {
                         sf::Vector2f* interceptPoint = calc_hit( p3, p4, playerPos, playerRayEnd);
 
                         if (interceptPoint) {
-                            float distance = std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y);
-                            float columnWidth = 10.0f;  // Width of the column to be drawn
-                            std::cout << i << " index\n";
-                            // Draw a column based on the distance
-                            sf::VertexArray interceptLine(sf::LinesStrip, 2);
-                            interceptLine[0].color = sf::Color::Red;
-                           interceptLine[0].position = playerPos;
-                            interceptLine[1].color = sf::Color::Red;
-                            interceptLine[1].position = *interceptPoint;
-                            window->draw(interceptLine);
-                            sf::RectangleShape column(sf::Vector2f(windowSize.x/90, center.y- (windowSize.y/distance)));
-                            column.setPosition((center.x)/i, (  (center.y - (windowSize.y / distance)) / 2));
-                            column.setFillColor(sf::Color::Red);  // Set the color as needed
-                            window->draw(column);
+                            if (distance > std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y) or distance == 0 ) {
+                                distance = std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y);
+                            }
+
+                            interceptToDraw = *interceptPoint;
 
                             delete interceptPoint;
+
                         }
                     }
-                    sf::VertexArray playerAngle(sf::LinesStrip, 2);
-                    playerAngle[0].color = sf::Color::Red;
-                    playerAngle[0].position = playerPos;
-                    playerAngle[1].color = sf::Color::Red;
-                    playerAngle[1].position.x = (cosf(angle+(M_PI/4)) * 1000) + playerPos.x;
-                    playerAngle[1].position.y = (sinf(angle + (M_PI / 4)) * 1000) + playerPos.y;
-                    window->draw(playerAngle);
+                    // draw ray now.
+                    if (distance > 0) {
+                        // Adjust the shading calculation. The further the distance, the darker the shade should be.
+                        sf::Uint8 shading = static_cast<sf::Uint8>(255 * std::max(0.0f, 1 - distance / 1000.0f));
+
+                        // Calculate the height of the column based on the distance.
+                        // Use a constant factor to scale the height appropriately.
+                        float columnHeight = windowSize.y / (distance * 0.02f);  // Adjust the 0.02f as needed
+
+                        // Ensure the column height does not exceed the window height.
+                        columnHeight = std::min(columnHeight, (float)windowSize.y);
+
+                        // Create the column with the calculated height.
+                        sf::RectangleShape column(sf::Vector2f(windowSize.x / 90, columnHeight));
+
+                        // Set the position of the column. The y-position is adjusted to vertically center the column.
+                        column.setPosition(i * (windowSize.x / 90), (windowSize.y - columnHeight) / 2.0f);
+
+                        // Set the color of the column with the calculated shading.
+                        column.setFillColor(sf::Color(255, shading, shading));
+
+                        // Draw the column.
+                        window->draw(column);
+                    }
+
+
+                    //sf::VertexArray playerAngle(sf::LinesStrip, 2);
+                    //playerAngle[0].color = sf::Color::Red;
+                    //playerAngle[0].position = playerPos;
+                    //playerAngle[1].color = sf::Color::Red;
+                    //playerAngle[1].position.x = (cosf(angle+(M_PI/4)) * 1000) + playerPos.x;
+                    //playerAngle[1].position.y = (sinf(angle + (M_PI / 4)) * 1000) + playerPos.y;
+                    //window->draw(playerAngle);
                 }
               
 
