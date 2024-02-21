@@ -127,15 +127,21 @@ void Game::run() {
                         auto p3 = it[x];
                         auto p4 = it[x + 1];
                         window->draw(objToDraw);
-                        sf::Vector2f* interceptPoint = calc_hit(playerPos, playerRayEnd, p3, p4);
+                        sf::Vector2f* interceptPoint = calc_hit( p3, p4, playerPos, playerRayEnd);
 
                         if (interceptPoint) {
                             float distance = std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y);
                             float columnWidth = 10.0f;  // Width of the column to be drawn
                             std::cout << i << " index\n";
                             // Draw a column based on the distance
+                            sf::VertexArray interceptLine(sf::LinesStrip, 2);
+                            interceptLine[0].color = sf::Color::Red;
+                           interceptLine[0].position = playerPos;
+                            interceptLine[1].color = sf::Color::Red;
+                            interceptLine[1].position = *interceptPoint;
+                            window->draw(interceptLine);
                             sf::RectangleShape column(sf::Vector2f(windowSize.x/90, center.y- (windowSize.y/distance)));
-                            column.setPosition((center.x)/i*25, (  (center.y - (windowSize.y / distance)) / 2));
+                            column.setPosition((center.x)/i, (  (center.y - (windowSize.y / distance)) / 2));
                             column.setFillColor(sf::Color::Red);  // Set the color as needed
                             window->draw(column);
 
