@@ -45,6 +45,7 @@ void Game::run() {
     worldData.worldObjects = { points };
     int camera_plane = playerPos.y / 2;
     std::cout << "Hello Rotation!\n";
+    auto windowSize = window->getSize();
 
     while (window->isOpen()) {
             while (window->pollEvent(event)) {
@@ -58,8 +59,8 @@ void Game::run() {
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
                     for (auto& it : worldData.worldObjects) {
                         for (auto& vec : it) {
-                            vec.x += cosf(angle-M_PI+(M_PI/6)) * 5.0f;
-                            vec.y += sinf(angle-M_PI + (M_PI / 6)) * 5.0f;
+                            vec.x += cosf(angle-M_PI+(M_PI/4)) * 5.0f;
+                            vec.y += sinf(angle-M_PI + (M_PI / 4)) * 5.0f;
                         }
                     }
 
@@ -85,24 +86,8 @@ void Game::run() {
                     angle += 0.05;
                 }
             }
-            window->clear(sf::Color::White)
-                ;            //for (auto it : this->worldData.worldObjects) {//<--- working
-            //    sf::VertexArray objToDraw(sf::LinesStrip, it.size());
+            window->clear(sf::Color::White);
 
-            //    // Assuming playerPosition is the center of rotation
-            //    sf::Transform transform;
-            //    transform.rotate(angle, playerPos.x, playerPos.y);
-            //    for (int indexOfObjectVec = 0; indexOfObjectVec < it.size(); indexOfObjectVec++) {
-            //        // Apply the rotation transform to each vertex
-            //        sf::Vector2f rotatedPoint = transform.transformPoint(it[indexOfObjectVec]);
-            //        objToDraw[indexOfObjectVec].position.x = rotatedPoint.x;
-            //        objToDraw[indexOfObjectVec].position.y = rotatedPoint.y;
-            //        objToDraw[indexOfObjectVec].color = sf::Color::Black;
-            //    }
-
-            //    window->draw(objToDraw);
-            //}
-            //test
             for (auto it : this->worldData.worldObjects) {
                 sf::VertexArray objToDraw(sf::LinesStrip, it.size());
 
@@ -124,7 +109,7 @@ void Game::run() {
                 sf::Vector2f center(window->getSize().x / 2.0f, window->getSize().y / 2.0f);
 
                 for (int i = 0; i <= 90; ++i) { // assuming angles are in degrees
-                    float angleInRadians = i * (3.14159 / 180.0); // convert degrees to radians
+                    float angleInRadians = i * (M_PI / 180.0); // convert degrees to radians
 
                     for (int x = 0; x < transformedPoints.size() - 1; x++) {
                         playerPos;
@@ -149,8 +134,8 @@ void Game::run() {
                             float columnWidth = 10.0f;  // Width of the column to be drawn
                             std::cout << i << " index\n";
                             // Draw a column based on the distance
-                            sf::RectangleShape column(sf::Vector2f(20, distance));
-                            column.setPosition((center.x)/i*25, distance/2);
+                            sf::RectangleShape column(sf::Vector2f(windowSize.x/90, center.y- (windowSize.y/distance)));
+                            column.setPosition((center.x)/i*25, (  (center.y - (windowSize.y / distance)) / 2));
                             column.setFillColor(sf::Color::Red);  // Set the color as needed
                             window->draw(column);
 
@@ -161,8 +146,8 @@ void Game::run() {
                     playerAngle[0].color = sf::Color::Red;
                     playerAngle[0].position = playerPos;
                     playerAngle[1].color = sf::Color::Red;
-                    playerAngle[1].position.x = (cosf(angle) * 1000) + playerPos.x;
-                    playerAngle[1].position.y = (sinf(angle) * 1000) + playerPos.y;
+                    playerAngle[1].position.x = (cosf(angle+(M_PI/4)) * 1000) + playerPos.x;
+                    playerAngle[1].position.y = (sinf(angle + (M_PI / 4)) * 1000) + playerPos.y;
                     window->draw(playerAngle);
                 }
               
