@@ -12,6 +12,8 @@ enum DIRECTIONS { LEFT, RIGHT, UP, DOWN, ROT_LEFT, ROT_RIGHT }; //left is 0, rig
 class Game {
 public:
 	float angle = 0;
+	sf::Texture texture;
+	sf::Sprite sprite;
 
 	bool keys[6];
 	//typedefs and helper types
@@ -25,7 +27,7 @@ public:
 	Game();
 	void run();
 	void HandleKeys(std::vector<std::vector<sf::Vector2f>>& world_Data);
-	
+	void draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle, sf::Vector2f playerPos );
 };
 
 

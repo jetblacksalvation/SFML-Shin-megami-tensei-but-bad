@@ -12,6 +12,9 @@ void Game::HandleKeys(WorldHelper::T_WorldObjects& world_Data) {
 
 
 Game::Game() {
+    for (auto& k : keys) {
+        k = false;
+    }
     if (!window) {
         window = std::make_unique< sf::RenderWindow>();
         (*window).create({ 800,800 }, "Shin Megami Tensei");
@@ -32,8 +35,8 @@ void Game::run() {
     //square 
     sf::Vector2f playerPos = { 400,400 };
 
-
-
+    texture.loadFromFile("brickWall.png");
+    sprite.setTexture(texture);
 
     sf::Texture playerImage;
 
@@ -59,136 +62,147 @@ void Game::run() {
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
                     for (auto& it : worldData.worldObjects) {
                         for (auto& vec : it) {
+                            //increase 
                             vec.x += cosf(angle-M_PI+(M_PI/4)) * 5.0f;
                             vec.y += sinf(angle-M_PI + (M_PI / 4)) * 5.0f;
                         }
                     }
 
                 }
+                keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
 
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-                    angle -= 0.1;
-                }
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
-                    angle += 0.1;
-
-                }
+                keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
 
 
             }
 
-            {        //input handleing here 
-
-                if (keys[ROT_LEFT]) {
-                    angle -= 0.05;
-                }
-                if (keys[ROT_RIGHT]) {
-                    angle += 0.05;
-                }
+            //eventually the movement will be changed, for now this will do.
+            
+            if (keys[ROT_LEFT]) {
+                angle -= 0.05;
             }
+            if (keys[ROT_RIGHT]) {
+                angle += 0.05;
+            }
+            
             window->clear(sf::Color::White);
-
-            for (auto it : this->worldData.worldObjects) {
-                sf::VertexArray objToDraw(sf::LinesStrip, it.size());
-
-                // Assuming playerPosition is the center of rotation
-                sf::Transform transform;
-                transform.rotate(angle, playerPos.x, playerPos.y);
-                std::vector<sf::Vector2f> transformedPoints;
-                for (int indexOfObjectVec = 0; indexOfObjectVec < it.size(); indexOfObjectVec++) {
-                    // Apply the rotation transform to each vertex
-                    sf::Vector2f rotatedPoint = transform.transformPoint(it[indexOfObjectVec]);
-                    transformedPoints.push_back(rotatedPoint);
-                    objToDraw[indexOfObjectVec].position.x = rotatedPoint.x;
-                    objToDraw[indexOfObjectVec].position.y = rotatedPoint.y;
-                    objToDraw[indexOfObjectVec].color = sf::Color::Black;
-                }
-                window->draw(objToDraw);
-
-                float windowWidth = static_cast<float>(window->getSize().x);
-                sf::Vector2f center(window->getSize().x / 2.0f, window->getSize().y / 2.0f);
-
-                for (int i = 0; i <= 90; ++i) { // assuming angles are in degrees
-                    float angleInRadians = i * (M_PI / 180.0); // convert degrees to radians
-
-
-                    float distance = 0;
-                    sf::Vector2f interceptToDraw;
-                    for (int x = 0; x < transformedPoints.size() - 1; x++) {
-                        playerPos;
-                        sf::Vector2f playerRayEnd;
-                        playerRayEnd.x = (cosf(angle + angleInRadians) * 1000) + playerPos.x;
-                        playerRayEnd.y = (sinf(angle + angleInRadians) * 1000) + playerPos.y;
-                        sf::VertexArray objToDraw(sf::LinesStrip, 2);
-                        objToDraw[0] = playerPos;
-                        objToDraw[0].color = sf::Color::Black;
-
-
-                        objToDraw[1] = playerRayEnd;
-                        objToDraw[1].color = sf::Color::Black;
-
-                        //std::cout << "x :" << playerRayEnd.x << ", Y : " << playerRayEnd.y << "\n";
-                        auto p3 = it[x];
-                        auto p4 = it[x + 1];
-                        window->draw(objToDraw);
-                        sf::Vector2f* interceptPoint = calc_hit( p3, p4, playerPos, playerRayEnd);
-
-                        if (interceptPoint) {
-                            if (distance > std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y) or distance == 0 ) {
-                                distance = std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y);
-                            }
-
-                            interceptToDraw = *interceptPoint;
-
-                            delete interceptPoint;
-
-                        }
-                    }
-                    // draw ray now.
-                    if (distance > 0) {
-                        // Adjust the shading calculation. The further the distance, the darker the shade should be.
-                        sf::Uint8 shading = static_cast<sf::Uint8>(255 * std::max(0.0f, 1 - distance / 1000.0f));
-
-                        // Calculate the height of the column based on the distance.
-                        // Use a constant factor to scale the height appropriately.
-                        float columnHeight = windowSize.y / (distance * 0.02f);  // Adjust the 0.02f as needed
-
-                        // Ensure the column height does not exceed the window height.
-                        columnHeight = std::min(columnHeight, (float)windowSize.y);
-
-                        // Create the column with the calculated height.
-                        sf::RectangleShape column(sf::Vector2f(windowSize.x / 90, columnHeight));
-
-                        // Set the position of the column. The y-position is adjusted to vertically center the column.
-                        column.setPosition(i * (windowSize.x / 90), (windowSize.y - columnHeight) / 2.0f);
-
-                        // Set the color of the column with the calculated shading.
-                        column.setFillColor(sf::Color(255, shading, shading));
-
-                        // Draw the column.
-                        window->draw(column);
-                    }
-
-
-                    //sf::VertexArray playerAngle(sf::LinesStrip, 2);
-                    //playerAngle[0].color = sf::Color::Red;
-                    //playerAngle[0].position = playerPos;
-                    //playerAngle[1].color = sf::Color::Red;
-                    //playerAngle[1].position.x = (cosf(angle+(M_PI/4)) * 1000) + playerPos.x;
-                    //playerAngle[1].position.y = (sinf(angle + (M_PI / 4)) * 1000) + playerPos.y;
-                    //window->draw(playerAngle);
-                }
-              
-
-            }
-            //playerSprite.setPosition(playerPos.x - 16, playerPos.y - 16);//offset by half of pixel dimensions   
-            //playerSprite.setRotation(angle);
-
-            //window->draw(playerSprite);
+            draw3DScene(this->worldData.worldObjects, angle, playerPos);
 
             window->display();
 
         }
     }
+void Game::draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle, sf::Vector2f playerPos) {
+    /*
+        Eventually add in tiling data.
+        Map should be 2d array, so yk world shapes should reflect that eventually
+
+    */
+
+    sf::Vector2u windowSize = window->getSize();
+
+    int rayNum = 90; 
+
+    for (auto it : allWorldShapes) {
+        sf::VertexArray objToDraw(sf::LinesStrip, it.size());
+
+        // Assuming playerPosition is the center of rotation
+        sf::Transform transform;
+        transform.rotate(angle, playerPos.x, playerPos.y);
+        std::vector<sf::Vector2f> transformedPoints;
+        for (int indexOfObjectVec = 0; indexOfObjectVec < it.size(); indexOfObjectVec++) {
+            // Apply the rotation transform to each vertex
+            sf::Vector2f rotatedPoint = transform.transformPoint(it[indexOfObjectVec]);
+            transformedPoints.push_back(rotatedPoint);
+            //objToDraw[indexOfObjectVec].position.x = rotatedPoint.x;
+            //objToDraw[indexOfObjectVec].position.y = rotatedPoint.y;
+            //objToDraw[indexOfObjectVec].color = sf::Color::Black;
+        }
+        window->draw(objToDraw);
+
+
+        for (int i = 0; i <= rayNum; ++i) { // assuming angles are in degrees
+            float angleInRadians = i * (M_PI / 180.0); // convert degrees to radians
+
+
+            float distance = 0;
+            sf::Vector2f interceptToDraw;
+            sf::Vector2f p3Closest;
+            sf::Vector2f p4Closest; 
+            for (int x = 0; x < transformedPoints.size() - 1; x++) {
+                playerPos;
+                sf::Vector2f playerRayEnd;
+                playerRayEnd.x = (cosf(angle + angleInRadians) * 1000) + playerPos.x;
+                playerRayEnd.y = (sinf(angle + angleInRadians) * 1000) + playerPos.y;
+                //sf::VertexArray objToDraw(sf::LinesStrip, 2);
+                //objToDraw[0] = playerPos;
+                //objToDraw[0].color = sf::Color::Black;
+
+
+                //objToDraw[1] = playerRayEnd;
+                //objToDraw[1].color = sf::Color::Black;
+
+                //std::cout << "x :" << playerRayEnd.x << ", Y : " << playerRayEnd.y << "\n";
+                auto p3 = it[x];
+                auto p4 = it[x + 1];
+                window->draw(objToDraw);
+                sf::Vector2f* interceptPoint = calc_hit(p3, p4, playerPos, playerRayEnd);
+
+                if (interceptPoint) {
+                    if (distance > std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y) or distance == 0) {
+                        distance = std::hypotf(playerPos.x - interceptPoint->x, playerPos.y - interceptPoint->y);
+                        interceptToDraw = *interceptPoint;
+                        p3Closest = p3;
+                        p4Closest = p4;
+                        delete interceptPoint;
+                        continue;
+                    }
+                    //ignore intercept if its distance is no good.
+                    delete interceptPoint;
+
+                }
+            }
+
+            if (distance > 0) {
+                // Adjust the shading calculation. The further the distance, the darker the shade should be.
+                sf::Vector2f wallVector = p4Closest - p3Closest;
+                float correctedDistance = distance * cos(angle);
+
+                float wallLength = std::sqrt(wallVector.x * wallVector.x + wallVector.y * wallVector.y);
+                float distanceAlongWall = ((interceptToDraw.x - p3Closest.x) * (wallVector.x / wallLength)
+                    + (interceptToDraw.y - p3Closest.y) * (wallVector.y / wallLength));
+                // Normalize the distance to get texture coordinates in the range [0, 1]
+                float textureX = distanceAlongWall / wallLength;
+
+
+                float columnHeight = windowSize.y / (distance * 0.02f);  // Adjust the 0.02f as needed
+
+                std::cout << "Column Hieght " << columnHeight << " \n";
+
+                // Create the column with the calculated height
+                sf::RectangleShape column(sf::Vector2f(windowSize.x / rayNum, columnHeight));
+
+
+                int texX = static_cast<int>(textureX * texture.getSize().x);
+
+                // Set the texture to the column
+                column.setTexture(&texture);
+                sf::IntRect textureRect(texX, 0, 1, texture.getSize().y);
+                column.setTextureRect(textureRect);
+
+                // Position the column
+                column.setPosition(i * (windowSize.x / rayNum), (windowSize.y - columnHeight) / 2.0f);
+
+                // Draw the column with the applied texture.
+                window->draw(column);
+
+
+            }
+
+        }
+
+    }
+
+}
 
 
