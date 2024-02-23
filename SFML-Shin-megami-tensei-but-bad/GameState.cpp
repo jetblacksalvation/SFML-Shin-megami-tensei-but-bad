@@ -1,110 +1,36 @@
-#pragma once
+#include "GameState.h"
+GameState::TGameStateInstance GameState::gameStateInstance;
+GameState::TPlayerState GameState::playerStateInstance;
 
-#include "Common.hpp"
-Game::TWindowPtr Game::window;
-Game::TGameInstance Game::gameInstance; // helper obj, its so that game state can grab whatever is needed.
+GameState::GameState() {
+	GameState::gameStateInstance = std::shared_ptr<GameState>(this);
+	//default state to roaming, this will be changed later 
+	GameState::playerStateInstance = std::make_shared<RoamingState>();
+
+	auto game = *Game::gameInstance;
 
 
-
-Game::Game() {
-    //instanceList.push_back(std::make_shared<Game>(this));
-    gameInstance = std::shared_ptr<Game>(this);
-    
-    
-    for (auto& k : keys) {
-        k = false;
-    }
-    if (!window) {
-        window = std::make_unique< sf::RenderWindow>();
-        (*window).create({ 800,800 }, "Shin Megami Tensei");
-        // Check if window creation was successful
-        if (!window) {
-            
-            // Handle the error, perhaps throw an exception or exit the program
-        }
-    }
-    else {
-        // Handle the case where the window is already created
-    }
-    GameState s = GameState();
 }
-void Game::run() {
-    WorldHelper::T_PrimitiveShape points({ sf::Vector2f{100,100}, sf::Vector2f{200, 100}, sf::Vector2f{200,200 }, sf::Vector2f{100,200} , sf::Vector2f{100,100} });//last index is so that lines can wrap back to start 
-    (*window).setFramerateLimit(120);
-    sf::Event event;
-    //square 
-    sf::Vector2f playerPos = { 400,400 };
-
-    texture.loadFromFile("brickWall.png");
-    sprite.setTexture(texture);
-
-    sf::Texture playerImage;
-
-    if (!playerImage.loadFromFile("Arrow.png")) exit(0); //this line loads the image AND kills your program if it doesn't load
-    sf::Sprite playerSprite;
-    playerSprite.setTexture(playerImage);
-    playerSprite.setPosition(playerPos.x - 16, playerPos.y - 16);//offset by half of pixel dimensions   
-
-    worldData.worldObjects = { points };
-    int camera_plane = playerPos.y / 2;
-    std::cout << "Hello Rotation!\n";
-    auto windowSize = window->getSize();
-
-    while (window->isOpen()) {
-        while (window->pollEvent(event)) {
-            if (event.type == event.Closed) {
-                window->close();
-                exit(0);
-            }
-
-
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-                for (auto& it : worldData.worldObjects) {
-                    for (auto& vec : it) {
-                        //increase 
-                        vec.x += cosf(angle-M_PI+(M_PI/4)) * 5.0f;
-                        vec.y += sinf(angle-M_PI + (M_PI / 4)) * 5.0f;
-                    }
-                }
-
-            }
-            keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
-
-            keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
-
-
-        }
-
-        //eventually the movement will be changed, for now this will do.
-            
-        if (keys[ROT_LEFT]) {
-            angle -= 0.05;
-        }
-        if (keys[ROT_RIGHT]) {
-            angle += 0.05;
-        }
-            
-        window->clear(sf::Color::White);
-        //draw3DScene(this->worldData.worldObjects, angle, playerPos);
-        GameState::playerStateInstance->HandleState();
-
-        window->display();
-
-    }
-    exit(0);
+void draw3DScene(sf::Vector2f& playerPos);
+void RoamingState::HandleState() {
+	//std::cout << "IN ROAMING\n";
+    draw3DScene(playerPos);
 }
-void Game::draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle, sf::Vector2f playerPos) {
-    /*
-        Eventually add in tiling data.
-        Map should be 2d array, so yk world shapes should reflect that eventually
 
-    */
+void draw3DScene( sf::Vector2f& playerPos) {
+    Game& game = *Game::gameInstance; 
+    WorldHelper::T_WorldObjects& allWorldShapes = game.worldData.worldObjects;
+    Game::TWindowPtr& window = game.window;
+        /*
+            Eventually add in tiling data.
+            Map should be 2d array, so yk world shapes should reflect that eventually
 
-    sf::Vector2u windowSize = window->getSize();
+        */
 
-    int rayNum = 90; 
+        sf::Vector2u windowSize = window->getSize();
 
+    int rayNum = 90;
+    auto angle = game.angle;
     for (auto it : allWorldShapes) {
         sf::VertexArray objToDraw(sf::LinesStrip, it.size());
 
@@ -130,7 +56,7 @@ void Game::draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle,
             float distance = 0;
             sf::Vector2f interceptToDraw;
             sf::Vector2f p3Closest;
-            sf::Vector2f p4Closest; 
+            sf::Vector2f p4Closest;
             for (int x = 0; x < transformedPoints.size() - 1; x++) {
                 playerPos;
                 sf::Vector2f playerRayEnd;
@@ -184,11 +110,11 @@ void Game::draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle,
                 sf::RectangleShape column(sf::Vector2f(windowSize.x / rayNum, columnHeight));
 
 
-                int texX = static_cast<int>(textureX * texture.getSize().x);
+                int texX = static_cast<int>(textureX * Game::gameInstance->texture.getSize().x);
 
                 // Set the texture to the column
-                column.setTexture(&texture);
-                sf::IntRect textureRect(texX, 0, 1, texture.getSize().y);
+                column.setTexture(&Game::gameInstance->texture);
+                sf::IntRect textureRect(texX, 0, 1, Game::gameInstance->texture.getSize().y);
                 column.setTextureRect(textureRect);
 
                 // Position the column
@@ -205,5 +131,3 @@ void Game::draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle,
     }
 
 }
-
-

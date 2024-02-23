@@ -5,7 +5,7 @@ int main()
 
 	// MAIN IS GAME::RUN
 
-	Game game;
+	Game game = Game();
 	game.run();
 
 
