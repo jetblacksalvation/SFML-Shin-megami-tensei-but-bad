@@ -25,15 +25,13 @@ public:
 	typedef std::unique_ptr<sf::RenderWindow> TWindowPtr;
 	typedef std::shared_ptr<Game> TGameInstance; 
 	//member variables
-	static  std::unique_ptr<sf::RenderWindow> window;
+
+	static  TWindowPtr window;
 	WorldHelper worldData; 
 	static TGameInstance gameInstance; // helper obj, its so that game state can grab whatever is needed.
-
 	//functions
 	Game();
 	void run();
-	void draw3DScene(WorldHelper::T_WorldObjects& allWorldShapes, float angle, sf::Vector2f playerPos );
-
 
 };
 

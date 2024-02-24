@@ -1,18 +1,42 @@
 #include "GameState.h"
 GameState::TGameStateInstance GameState::gameStateInstance;
 GameState::TPlayerState GameState::playerStateInstance;
+sf::Event  IPlayerState::event;
 
 GameState::GameState() {
 	GameState::gameStateInstance = std::shared_ptr<GameState>(this);
 	//default state to roaming, this will be changed later 
 	GameState::playerStateInstance = std::make_shared<RoamingState>();
 
-	auto game = *Game::gameInstance;
 
 
 }
 void draw3DScene(sf::Vector2f& playerPos);
 void RoamingState::HandleState() {
+    while (Game::gameInstance->window->pollEvent(event)) {
+        if (event.type == event.Closed) {
+            //Game::gameInstance->window->close();
+            exit(0);
+        }
+
+
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            for (auto& it : Game::gameInstance->worldData.worldObjects) {
+                for (auto& vec : it) {
+                    //increase 
+                    vec.x += cosf(Game::gameInstance->angle - M_PI +  (M_PI / 4)) * 5.0f;
+                    vec.y += sinf(Game::gameInstance->angle - M_PI + (M_PI / 4)) * 5.0f;
+                }
+            }
+
+        }
+        Game::gameInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+
+        Game::gameInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+
+
+    }
 	//std::cout << "IN ROAMING\n";
     draw3DScene(playerPos);
 }

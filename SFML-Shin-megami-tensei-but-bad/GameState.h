@@ -22,19 +22,13 @@ public:
     static TGameStateInstance               gameStateInstance;
     static TPlayerState                     playerStateInstance; 
     
-	enum class PlayerStateEnums
-	{
-		Roaming = 0// roaming has nested 
-	};
-	PlayerStateEnums CurrentState;
-
     GameState();
 };
 
 class IPlayerState {
 public:
 	//variables 
-	
+	static     sf::Event event;
 	virtual void HandleState() {
 		static_assert("ERR: This object has no defined virtual override for HanldeState!\n");
 	}
