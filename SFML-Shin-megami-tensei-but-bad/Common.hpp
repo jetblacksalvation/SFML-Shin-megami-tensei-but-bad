@@ -16,11 +16,8 @@ enum DIRECTIONS { LEFT, RIGHT, UP, DOWN, ROT_LEFT, ROT_RIGHT }; //left is 0, rig
 
 class Game:public std::enable_shared_from_this<Game>{
 public:
-	float angle = 0;
-	sf::Texture texture;
-	sf::Sprite sprite;
 
-	bool keys[6];
+
 	//typedefs and helper types
 	typedef std::unique_ptr<sf::RenderWindow> TWindowPtr;
 	typedef std::shared_ptr<Game> TGameInstance; 

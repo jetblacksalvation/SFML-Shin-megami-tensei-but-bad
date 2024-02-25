@@ -11,9 +11,7 @@ Game::Game() {
     gameInstance = std::shared_ptr<Game>(this);
     
     
-    for (auto& k : keys) {
-        k = false;
-    }
+
     if (!window) {
         window = std::make_unique< sf::RenderWindow>();
         (*window).create({ 800,800 }, "Shin Megami Tensei");
@@ -29,24 +27,16 @@ Game::Game() {
     GameState::GameState();
 }
 void Game::run() {
-    WorldHelper::T_PrimitiveShape points({ sf::Vector2f{100,100}, sf::Vector2f{200, 100}, sf::Vector2f{200,200 }, sf::Vector2f{100,200} , sf::Vector2f{100,100} });//last index is so that lines can wrap back to start 
+    WorldHelper::T_PrimitiveShape points({ sf::Vector2f{-50,50}, sf::Vector2f{50, 50}, sf::Vector2f{-50,50 }, sf::Vector2f{-50,100},  sf::Vector2f{50,100},sf::Vector2f{50,50 } });//last index is so that lines can wrap back to start 
     (*window).setFramerateLimit(120);
     sf::Event event;
     //square 
-    sf::Vector2f playerPos = { 400,400 };
-
-    texture.loadFromFile("brickWall.png"); 
-    sprite.setTexture(texture);
 
     sf::Texture playerImage;
 
-    if (!playerImage.loadFromFile("Arrow.png")) exit(0); //this line loads the image AND kills your program if it doesn't load
-    sf::Sprite playerSprite;
-    playerSprite.setTexture(playerImage);
-    playerSprite.setPosition(playerPos.x - 16, playerPos.y - 16);//offset by half of pixel dimensions   
+
 
     worldData.worldObjects = { points };
-    int camera_plane = playerPos.y / 2;
     std::cout << "Hello Rotation!\n";
     auto windowSize = window->getSize();
 
@@ -55,12 +45,7 @@ void Game::run() {
 
         //eventually the movement will be changed, for now this will do.
             
-        if (keys[ROT_LEFT]) {
-            angle -= 0.05;
-        }
-        if (keys[ROT_RIGHT]) {
-            angle += 0.05;
-        }
+
             
         window->clear(sf::Color::White);
         //draw3DScene(this->worldData.worldObjects, angle, playerPos);

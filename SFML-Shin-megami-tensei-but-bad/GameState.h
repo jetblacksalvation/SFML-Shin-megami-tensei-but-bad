@@ -21,14 +21,18 @@ public:
     typedef std::shared_ptr<IPlayerState>  TPlayerState;
     static TGameStateInstance               gameStateInstance;
     static TPlayerState                     playerStateInstance; 
-    
+    static sf::Event event;
+
+    static bool keys[6];
+    static float angle; 
     GameState();
 };
 
 class IPlayerState {
 public:
 	//variables 
-	static     sf::Event event;
+    sf::Texture texture;
+    sf::Sprite sprite;
 	virtual void HandleState() {
 		static_assert("ERR: This object has no defined virtual override for HanldeState!\n");
 	}
@@ -40,10 +44,11 @@ class RoamingState;
 
 class RoamingState : public IPlayerState {
 public:
-    sf::Vector2f playerPos = { 400,400 };
+    RoamingState();
+    sf::Vector2f playerPos = { 0,0 };
 
 	void HandleState();
-    
+    void draw3DScene();
 };
 
 #endif

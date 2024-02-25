@@ -1,60 +1,85 @@
 #include "GameState.h"
-GameState::TGameStateInstance GameState::gameStateInstance;
-GameState::TPlayerState GameState::playerStateInstance;
-sf::Event  IPlayerState::event;
+//re-decs 
 
+GameState::TGameStateInstance GameState::gameStateInstance;
+GameState::TPlayerState       GameState::playerStateInstance;
+bool                          GameState::keys[];
+float                         GameState::angle;
+
+sf::Event                     GameState::event;
+//funcs 
 GameState::GameState() {
 	GameState::gameStateInstance = std::shared_ptr<GameState>(this);
 	//default state to roaming, this will be changed later 
 	GameState::playerStateInstance = std::make_shared<RoamingState>();
 
-
+    for (auto& k : keys) {
+        k = false;
+    }
+    angle = M_PI/4;
 
 }
-void draw3DScene(sf::Vector2f& playerPos);
+RoamingState::RoamingState() {
+    texture.loadFromFile("brickWall.png");
+    sprite.setTexture(texture);
+}
 void RoamingState::HandleState() {
-    while (Game::gameInstance->window->pollEvent(event)) {
-        if (event.type == event.Closed) {
-            //Game::gameInstance->window->close();
-            exit(0);
+    int worldD[10][20];
+    std::cout << "The P_angle = " << GameState::gameStateInstance->angle << std::endl; 
+    std::cout << RoamingState::playerPos.x << ", " << RoamingState::playerPos.y << "\n";
+    while (Game::gameInstance->window->pollEvent(GameState::event)) {      
+        if (GameState::event.type == GameState::event.Closed) {
+            std::cout << "Closing\n";
+            Game::gameInstance->window->close();
+            abort();
         }
 
 
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            for (auto& it : Game::gameInstance->worldData.worldObjects) {
-                for (auto& vec : it) {
-                    //increase 
-                    vec.x += cosf(Game::gameInstance->angle - M_PI +  (M_PI / 4)) * 5.0f;
-                    vec.y += sinf(Game::gameInstance->angle - M_PI + (M_PI / 4)) * 5.0f;
-                }
-            }
-
-        }
-        Game::gameInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
-
-        Game::gameInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+        GameState::gameStateInstance->keys[UP]        = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        GameState::gameStateInstance->keys[ROT_LEFT]  = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+        GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
 
 
     }
+    if (GameState::gameStateInstance->keys[UP]) {
+        for (auto& it : Game::gameInstance->worldData.worldObjects) {
+            for (auto& vec : it) {
+                //increase 
+                vec.x += cosf(GameState::gameStateInstance->angle - M_PI + (M_PI / 4)) * 5.0f;
+                vec.y += sinf(GameState::gameStateInstance->angle - M_PI + (M_PI / 4)) * 5.0f;
+            }
+        }
+    }
+    if (GameState::gameStateInstance->keys[ROT_LEFT]) {
+        GameState::gameStateInstance->angle -= 0.05;
+    }
+    if (GameState::gameStateInstance->keys[ROT_RIGHT]) {
+        GameState::gameStateInstance->angle += 0.05;
+    }
+    if (GameState::gameStateInstance->angle < 0.0) {
+        GameState::gameStateInstance->angle += 2 * M_PI;
+    }
+    else if (GameState::gameStateInstance->angle >= 2 * M_PI) {
+        GameState::gameStateInstance->angle -= 2 * M_PI;
+    }
 	//std::cout << "IN ROAMING\n";
-    draw3DScene(playerPos);
+    draw3DScene();
 }
 
-void draw3DScene( sf::Vector2f& playerPos) {
+void RoamingState::draw3DScene() {
     Game& game = *Game::gameInstance; 
     WorldHelper::T_WorldObjects& allWorldShapes = game.worldData.worldObjects;
     Game::TWindowPtr& window = game.window;
-        /*
-            Eventually add in tiling data.
-            Map should be 2d array, so yk world shapes should reflect that eventually
+    /*
+        Eventually add in tiling data.
+        Map should be 2d array, so yk world shapes should reflect that eventually
 
-        */
+    */
 
-        sf::Vector2u windowSize = window->getSize();
+    sf::Vector2u windowSize = window->getSize();
 
     int rayNum = 90;
-    auto angle = game.angle;
+    auto angle = GameState::gameStateInstance->angle;
     for (auto it : allWorldShapes) {
         sf::VertexArray objToDraw(sf::LinesStrip, it.size());
 
@@ -66,9 +91,7 @@ void draw3DScene( sf::Vector2f& playerPos) {
             // Apply the rotation transform to each vertex
             sf::Vector2f rotatedPoint = transform.transformPoint(it[indexOfObjectVec]);
             transformedPoints.push_back(rotatedPoint);
-            //objToDraw[indexOfObjectVec].position.x = rotatedPoint.x;
-            //objToDraw[indexOfObjectVec].position.y = rotatedPoint.y;
-            //objToDraw[indexOfObjectVec].color = sf::Color::Black;
+
         }
         window->draw(objToDraw);
 
@@ -86,15 +109,7 @@ void draw3DScene( sf::Vector2f& playerPos) {
                 sf::Vector2f playerRayEnd;
                 playerRayEnd.x = (cosf(angle + angleInRadians) * 1000) + playerPos.x;
                 playerRayEnd.y = (sinf(angle + angleInRadians) * 1000) + playerPos.y;
-                //sf::VertexArray objToDraw(sf::LinesStrip, 2);
-                //objToDraw[0] = playerPos;
-                //objToDraw[0].color = sf::Color::Black;
 
-
-                //objToDraw[1] = playerRayEnd;
-                //objToDraw[1].color = sf::Color::Black;
-
-                //std::cout << "x :" << playerRayEnd.x << ", Y : " << playerRayEnd.y << "\n";
                 auto p3 = it[x];
                 auto p4 = it[x + 1];
                 window->draw(objToDraw);
@@ -134,11 +149,11 @@ void draw3DScene( sf::Vector2f& playerPos) {
                 sf::RectangleShape column(sf::Vector2f(windowSize.x / rayNum, columnHeight));
 
 
-                int texX = static_cast<int>(textureX * Game::gameInstance->texture.getSize().x);
+                int texX = static_cast<int>(textureX * texture.getSize().x);
 
                 // Set the texture to the column
-                column.setTexture(&Game::gameInstance->texture);
-                sf::IntRect textureRect(texX, 0, 1, Game::gameInstance->texture.getSize().y);
+                column.setTexture(&texture);
+                sf::IntRect textureRect(texX, 0, 1,texture.getSize().y);
                 column.setTextureRect(textureRect);
 
                 // Position the column
