@@ -6,6 +6,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <memory>
+
 #include "GameState.h"
 /*
 	COMMON TYPES, FUNCTIONS, ETC...
