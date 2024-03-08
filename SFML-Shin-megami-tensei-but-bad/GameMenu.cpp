@@ -71,7 +71,6 @@ void MenuState::draw2DScene() {
 	auto worldData = Game::gameInstance->worldData;
     auto& window = Game::gameInstance->window; 
     float angle = GameState::gameStateInstance->angle;
-    sf::CircleShape p(20);
     auto&  playerData = *(RoamingState*)PlayerStateRegistrar::getInstance<RoamingState>().get();
     playerPos = playerData.playerPos; 
     //playerData.sprite.setPosition(playerPos);

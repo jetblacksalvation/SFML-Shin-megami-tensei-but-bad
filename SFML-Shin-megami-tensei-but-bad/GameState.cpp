@@ -74,6 +74,7 @@ void RoamingState::OnLoad() {
 
 GameState::GameState() {
 	GameState::gameStateInstance = std::shared_ptr<GameState>(this);
+    
 	//default state to roaming, this will be changed later 
     
     for (auto& k : keys) {
@@ -83,7 +84,7 @@ GameState::GameState() {
     //PlayerStateRegistrar::registerInstance<RoamingState>(); 
     PlayerStateRegistrar::HandleChangeState<RoamingState>();
 
-    GameState::playerStateInstance = PlayerStateRegistrar::getInstance<RoamingState>();
+    //GameState::playerStateInstance = PlayerStateRegistrar::getInstance<RoamingState>();
 
 
 }

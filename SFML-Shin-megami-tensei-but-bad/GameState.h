@@ -5,6 +5,7 @@
 
 
 #include <typeindex>
+#include <format>
 
 #include <SFML/Graphics.hpp>
 #include <memory>
@@ -38,18 +39,30 @@ public:
     }
 
     template <typename T>
-    static std::shared_ptr<IPlayerState>& getInstance() {
+    static std::shared_ptr<IPlayerState> getInstance() {
         auto it = instances.find(typeid(T));
         if (it != instances.end()) {
             return (it->second);
+        }
+        else {
+            throw std::runtime_error(std::format("ERR: getInstance could not find type {}!", typeid(T).name()));
         }
     }
     template<typename T, typename = std::enable_if_t<std::is_default_constructible_v<T>>>
     static void HandleChangeState() {
         std::cout << "Changing global state...\n";
-        PlayerStateRegistrar::registerInstance(std::make_shared<T>());
+        try {
 
-        GameState::playerStateInstance = instances[typeid(T)];
+            std::shared_ptr<IPlayerState> v  = PlayerStateRegistrar::getInstance<T>();
+            GameState::playerStateInstance = v;
+
+        }
+        catch (...) {
+            PlayerStateRegistrar::registerInstance(std::make_shared<T>());
+
+            GameState::playerStateInstance = instances[typeid(T)];
+        }
+
     }
 
     template <typename U>
