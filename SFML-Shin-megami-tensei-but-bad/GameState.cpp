@@ -50,7 +50,7 @@ void RoamingState::OnLoad() {
                     if (y == 0) {
                         point.y *= scaleFactor;
                     }
-                    temp.push_back({ point.x + ((x ) *scaleFactor), point.y + ((y ) *scaleFactor) });
+                    temp.push_back({ point.x + ((x )) *scaleFactor, point.y + ((y ) *scaleFactor) });
 
                     //std::cout << x << ": " << point.x + ((x) *scaleFactor) << ", " << point.y + ((y) *scaleFactor) <<" OBJECT" << std::endl;
                 }
@@ -172,7 +172,6 @@ void RoamingState::draw3DScene() {
 
     int rayNum = 90;
     auto angle = GameState::gameStateInstance->angle;
-    std::cout << allWorldShapes.size() << " - obj to draw\n";
 
     for (int i = 0; i <= rayNum; ++i) { // assuming angles are in degrees
         float distance = 0;
@@ -227,42 +226,6 @@ void RoamingState::draw3DScene() {
 
                 }
             }
-
-            //if (distance > 0) {
-            //    // Adjust the shading calculation. The further the distance, the darker the shade should be.
-            //    sf::Vector2f wallVector = p4Closest - p3Closest;
-            //    float correctedDistance = distance * cos(angle);
-
-            //    float wallLength = std::sqrt(wallVector.x * wallVector.x + wallVector.y * wallVector.y);
-            //    float distanceAlongWall = ((interceptToDraw.x - p3Closest.x) * (wallVector.x / wallLength)
-            //        + (interceptToDraw.y - p3Closest.y) * (wallVector.y / wallLength));
-            //    // Normalize the distance to get texture coordinates in the range [0, 1]
-            //    float textureX = distanceAlongWall / wallLength;
-
-
-            //    float columnHeight = windowSize.y / (distance * 0.02f);  // Adjust the 0.02f as needed
-
-
-            //    // Create the column with the calculated height
-            //    sf::RectangleShape column(sf::Vector2f(windowSize.x / rayNum, columnHeight));
-
-
-            //    int texX = static_cast<int>(textureX * texture.getSize().x);
-
-            //    // Set the texture to the column
-            //    column.setTexture(&texture);
-            //    sf::IntRect textureRect(texX, 0, 1,texture.getSize().y);
-            //    column.setTextureRect(textureRect);
-
-            //    // Position the column
-            //    column.setPosition(i * (windowSize.x / rayNum), (windowSize.y - columnHeight) / 2.0f);
-
-            //    // Draw the column with the applied texture.
-            //    window->draw(column);
-
-
-            //}
-
         }
         if (distance > 0) {
             // Adjust the shading calculation. The further the distance, the darker the shade should be.
