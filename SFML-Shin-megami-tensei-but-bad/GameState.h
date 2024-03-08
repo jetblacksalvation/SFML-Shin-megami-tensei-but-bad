@@ -90,8 +90,7 @@ public:
 class IPlayerState: public std::enable_shared_from_this<IPlayerState> {
 public:
 	//variables 
-    sf::Texture texture;
-    sf::Sprite sprite;
+
     IPlayerState() {
         isLoaded = false;
     };
@@ -119,7 +118,8 @@ class RoamingState : public IPlayerState {
 public:
     RoamingState();
     sf::Vector2f playerPos = { 0,0 };
-
+    sf::Texture texture;
+    sf::Sprite sprite;
     void HandleState();
     void OnLoad() ;
     void draw3DScene();

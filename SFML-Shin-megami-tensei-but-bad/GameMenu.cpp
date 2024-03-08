@@ -29,21 +29,23 @@ void MenuState::HandleState() {
             PlayerStateRegistrar::HandleChangeState<RoamingState>();
             //PlayerStateRegistrar::PrintInfo();
 		}
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            for (auto& it : worldData.worldObjects) {
-                for (auto& vec : it) {
-                    vec.x += cosf(angle - (M_PI / 4)) * 5.0f;
-                    vec.y += sinf(angle-(M_PI/4) ) * 5.0f;
-                }
-            }
 
-        }
         GameState::gameStateInstance->keys[UP] = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
         GameState::gameStateInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
         GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
         
 
 	}
+    if (GameState::gameStateInstance->keys[UP]) {
+        for (auto& it : worldData.worldObjects) {
+            for (auto& vec : it) {
+                vec.x += cosf(angle - (M_PI / 4) - M_PI) * 2.5f;
+                vec.y += sinf(angle - (M_PI / 4) - M_PI) * 2.5f;
+            }
+        }
+
+        
+    }
     if (GameState::gameStateInstance->keys[ROT_LEFT]) {
         GameState::gameStateInstance->angle -= 0.05;
     }
@@ -57,6 +59,7 @@ void MenuState::HandleState() {
         GameState::gameStateInstance->angle -= 2 * M_PI;
     }
     window->clear(sf::Color::White);
+    std::cout << "angle = " << angle << std::endl; 
 	draw2DScene(); 
 }
 
@@ -71,20 +74,21 @@ void MenuState::draw2DScene() {
     sf::CircleShape p(20);
     auto&  playerData = *(RoamingState*)PlayerStateRegistrar::getInstance<RoamingState>().get();
     playerPos = playerData.playerPos; 
-    p.setPosition(playerPos);
-    p.setFillColor(sf::Color::Black);
-    window->draw(p);
+    //playerData.sprite.setPosition(playerPos);
+    sf::Texture texture; 
+
+    texture.loadFromFile("Arrow.png");
+    sf::Sprite sprite; 
+    sprite.setTexture(texture);
+    sprite.setPosition({ playerPos.x,playerPos.y });
+    sprite.setRotation((angle+(M_PI / 4)) * (180.0 / M_PI));
+    sprite.setOrigin(16, 16);
+    window->draw(sprite);
     for (auto it : worldData.worldObjects) {
         sf::VertexArray objToDraw(sf::LinesStrip, it.size());
-        //std::cout << "its size is " << it.size() << std::endl; 
-        // Assuming playerPosition is the center of rotation
-        sf::Transform transform;
-        transform.rotate((angle)*(180.0/M_PI), playerPos.x, playerPos.y);
-        std::vector<sf::Vector2f> transformedPoints;
         for (int indexOfObjectVec = 0; indexOfObjectVec < it.size(); indexOfObjectVec++) {
             // Apply the rotation transform to each vertex
-            sf::Vector2f rotatedPoint = transform.transformPoint(it[indexOfObjectVec]);
-            transformedPoints.push_back(rotatedPoint);
+            sf::Vector2f rotatedPoint = it[indexOfObjectVec];
             objToDraw[indexOfObjectVec].position.x = rotatedPoint.x ;
             objToDraw[indexOfObjectVec].position.y = rotatedPoint.y ;
             objToDraw[indexOfObjectVec].color = sf::Color::Black;
@@ -92,20 +96,6 @@ void MenuState::draw2DScene() {
         
         window->draw(objToDraw);
 
-
-        //for (int i = 0; i <= 90; ++i) { // assuming angles are in degrees
-        for (auto i = 1; i <= 4; ++i) {
-            sf::VertexArray playerAngle(sf::LinesStrip, 2);
-            playerAngle[0].color = sf::Color::Red;
-            playerAngle[0].position = playerPos;
-            playerAngle[1].color = sf::Color::Red;
-            playerAngle[1].position.x = (cosf(angle - (M_PI / 4)) * 1000);
-            playerAngle[1].position.y = (sinf(angle - (M_PI / 4)) * 1000);
-            window->draw(playerAngle);
-        }
-
-        /*}*/
-              
 
     }
     window->display();
