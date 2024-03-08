@@ -39,8 +39,8 @@ void MenuState::HandleState() {
     if (GameState::gameStateInstance->keys[UP]) {
         for (auto& it : worldData.worldObjects) {
             for (auto& vec : it) {
-                vec.x += cosf(angle - (M_PI / 4) - M_PI) * 2.5f;
-                vec.y += sinf(angle - (M_PI / 4) - M_PI) * 2.5f;
+                vec.x += cosf(angle - (3 * (M_PI / 4))) * 2.5f;
+                vec.y += sinf(angle - (3 * (M_PI / 4))) * 2.5f;
             }
         }
 
@@ -59,7 +59,6 @@ void MenuState::HandleState() {
         GameState::gameStateInstance->angle -= 2 * M_PI;
     }
     window->clear(sf::Color::White);
-    std::cout << "angle = " << angle << std::endl; 
 	draw2DScene(); 
 }
 
@@ -79,8 +78,8 @@ void MenuState::draw2DScene() {
     texture.loadFromFile("Arrow.png");
     sf::Sprite sprite; 
     sprite.setTexture(texture);
-    sprite.setPosition({ playerPos.x,playerPos.y });
-    sprite.setRotation((angle+(M_PI / 4)) * (180.0 / M_PI));
+    sprite.setPosition({ 400,400 });
+    sprite.setRotation((angle +(  3*(M_PI / 4))) * (180.0 / M_PI));
     sprite.setOrigin(16, 16);
     window->draw(sprite);
     for (auto it : worldData.worldObjects) {
@@ -88,8 +87,8 @@ void MenuState::draw2DScene() {
         for (int indexOfObjectVec = 0; indexOfObjectVec < it.size(); indexOfObjectVec++) {
             // Apply the rotation transform to each vertex
             sf::Vector2f rotatedPoint = it[indexOfObjectVec];
-            objToDraw[indexOfObjectVec].position.x = rotatedPoint.x ;
-            objToDraw[indexOfObjectVec].position.y = rotatedPoint.y ;
+            objToDraw[indexOfObjectVec].position.x = rotatedPoint.x -playerPos.x +400;
+            objToDraw[indexOfObjectVec].position.y = rotatedPoint.y -playerPos.y+400;
             objToDraw[indexOfObjectVec].color = sf::Color::Black;
         }
         

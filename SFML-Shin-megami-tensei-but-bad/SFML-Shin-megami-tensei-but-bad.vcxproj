@@ -134,6 +134,7 @@
     <ClCompile Include="CommonMath.cpp" />
     <ClCompile Include="GameMenu.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

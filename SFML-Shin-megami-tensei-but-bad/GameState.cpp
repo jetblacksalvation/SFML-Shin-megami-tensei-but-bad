@@ -55,7 +55,8 @@ void RoamingState::OnLoad() {
                     //std::cout << x << ": " << point.x + ((x) *scaleFactor) << ", " << point.y + ((y) *scaleFactor) <<" OBJECT" << std::endl;
                 }
                 if (worldData[x-1][y-1] == 2) {
-                    playerPos = sf::Vector2f{ (float)x * scaleFactor,(float) y * scaleFactor };
+                    std::cout << x << ", " << y << std::endl; 
+                    playerPos = sf::Vector2f{ (float)(x) * scaleFactor,(float) (y+1) * scaleFactor };
                 }
 
             }
@@ -83,10 +84,7 @@ GameState::GameState() {
     angle = M_PI/4;
     //PlayerStateRegistrar::registerInstance<RoamingState>(); 
     PlayerStateRegistrar::HandleChangeState<RoamingState>();
-
     //GameState::playerStateInstance = PlayerStateRegistrar::getInstance<RoamingState>();
-
-
 }
 RoamingState::RoamingState()  {
     std::cout << "Roaming State Instantiated!\n";

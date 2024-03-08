@@ -2,7 +2,7 @@
 #pragma once
 #include "Common.hpp"
 
-
+#include <fstream> 
 
 #include <typeindex>
 #include <format>
@@ -59,7 +59,6 @@ public:
         }
         catch (...) {
             PlayerStateRegistrar::registerInstance(std::make_shared<T>());
-
             GameState::playerStateInstance = instances[typeid(T)];
         }
 
@@ -133,6 +132,22 @@ public:
     sf::Vector2f playerPos = { 0,0 };
     sf::Texture texture;
     sf::Sprite sprite;
+
+    class gridWorld {
+    public: 
+        gridWorld();
+        gridWorld(std::ifstream);
+        
+        void setGrid(int x, int y); 
+
+        std::vector<int> getGrid();
+
+
+    private:
+        std::vector<int> gridValues; 
+    };
+    gridWorld gridData;
+
     void HandleState();
     void OnLoad() ;
     void draw3DScene();
