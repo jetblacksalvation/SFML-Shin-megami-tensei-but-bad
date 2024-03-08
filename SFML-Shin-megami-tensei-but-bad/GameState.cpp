@@ -13,6 +13,10 @@ sf::Event                     GameState::event;
 
 
 void RoamingState::OnLoad() {
+    if (isLoaded == true) { return; }
+    if (Game::gameInstance->worldData.worldObjects.size() > 3) {
+        return;
+    }
     std::cout << "is loaded!\n";
     WorldHelper::T_PrimitiveShape points({ sf::Vector2f{-50,50}, sf::Vector2f{50, 50}, sf::Vector2f{-50,50 }, sf::Vector2f{-50,150},  sf::Vector2f{50,150},sf::Vector2f{50,50 } });//last index is so that lines can wrap back to start 
     //offset each point via player offset in world array
@@ -48,7 +52,7 @@ void RoamingState::OnLoad() {
                     }
                     temp.push_back({ point.x + ((x ) *scaleFactor), point.y + ((y ) *scaleFactor) });
 
-                    std::cout << x << ": " << point.x + ((x) *scaleFactor) << ", " << point.y + ((y) *scaleFactor) <<" OBJECT" << std::endl;
+                    //std::cout << x << ": " << point.x + ((x) *scaleFactor) << ", " << point.y + ((y) *scaleFactor) <<" OBJECT" << std::endl;
                 }
                 if (worldData[x-1][y-1] == 2) {
                     playerPos = sf::Vector2f{ (float)x * scaleFactor,(float) y * scaleFactor };
@@ -58,19 +62,20 @@ void RoamingState::OnLoad() {
             if (temp.size() > 0) {
                 vertexCount++;
 
-                std::cout << vertexCount << " has a size of " << temp.size() << std::endl;
+                //std::cout << vertexCount << " has a size of " << temp.size() << std::endl;
                 allWorldShapes.push_back(temp);
 
             }
         }
     }
+    isLoaded = true; 
     std::cout << allWorldShapes.size() << ", is the size at end of funct\n";
 }
 
 GameState::GameState() {
 	GameState::gameStateInstance = std::shared_ptr<GameState>(this);
 	//default state to roaming, this will be changed later 
-
+    
     for (auto& k : keys) {
         k = false;
     }
@@ -83,6 +88,7 @@ GameState::GameState() {
 
 }
 RoamingState::RoamingState()  {
+    std::cout << "Roaming State Instantiated!\n";
 
     texture.loadFromFile("brickWall.png");
     sprite.setTexture(texture);
@@ -146,9 +152,11 @@ void RoamingState::HandleState() {
     }
 	//std::cout << "IN ROAMING\n";
     draw3DScene();
+    
 }
 
 void RoamingState::draw3DScene() {
+    //std::cout << "dwwr \n";
     Game& game = *Game::gameInstance.get(); 
     WorldHelper::T_WorldObjects& allWorldShapes = game.worldData.worldObjects;
     Game::TWindowPtr& window = game.window;
@@ -164,6 +172,8 @@ void RoamingState::draw3DScene() {
 
     int rayNum = 90;
     auto angle = GameState::gameStateInstance->angle;
+    std::cout << allWorldShapes.size() << " - obj to draw\n";
+
     for (int i = 0; i <= rayNum; ++i) { // assuming angles are in degrees
         float distance = 0;
         sf::Vector2f interceptToDraw;
@@ -291,6 +301,7 @@ void RoamingState::draw3DScene() {
         }
 
     }
+    window->display(); 
 
 }
 

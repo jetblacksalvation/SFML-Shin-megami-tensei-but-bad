@@ -21,29 +21,35 @@ class PlayerStateRegistrar{
 public:
     template <typename T, typename = void>
     static void registerInstance(const std::shared_ptr<T>& instance) {
-        auto it = instances.find(typeid(T));
-        if (it == instances.end()) {
-            instances[typeid(T)] = instance;
+
+        for (auto it : instances) {
+            //std::cout << it.first.name() << " : "<<typeid(T).name() << " ?= " << instance << std::endl;//debug
+
+            if (it.first.name() == typeid(T).name()) {
+                std::cout << "Instance of type " << typeid(T).name() << " already registered." << std::endl;
+
+                return;
+            }
         }
-        else {
-            std::cout << "Instance of type " << typeid(T).name() << " already registered." << std::endl;
-        }
+        instances[typeid(T)] = instance;
+        std::cout << "NEW: Instance of type " << typeid(T).name() << " registered!" << std::endl;
+
+        
     }
 
     template <typename T>
-    static std::shared_ptr<IPlayerState> getInstance() {
+    static std::shared_ptr<IPlayerState>& getInstance() {
         auto it = instances.find(typeid(T));
         if (it != instances.end()) {
-            return std::static_pointer_cast<IPlayerState>(it->second);
+            return (it->second);
         }
-        return nullptr;
     }
     template<typename T, typename = std::enable_if_t<std::is_default_constructible_v<T>>>
     static void HandleChangeState() {
         std::cout << "Changing global state...\n";
         PlayerStateRegistrar::registerInstance(std::make_shared<T>());
 
-        GameState::playerStateInstance = PlayerStateRegistrar::getInstance<T>();
+        GameState::playerStateInstance = instances[typeid(T)];
     }
 
     template <typename U>
@@ -51,6 +57,11 @@ public:
         std::cout << "Changing global state with value...\n";
         PlayerStateRegistrar::registerInstance(std::make_shared<std::remove_reference_t<U>>(std::forward<U>(value)));
         GameState::playerStateInstance = PlayerStateRegistrar::getInstance<std::remove_reference_t<U>>();
+    }
+    static void PrintInfo() {
+        for (auto it : instances) {
+            std::cout << it.first.name() << " -> " << it.second << std::endl; 
+        }
     }
 private:
     static std::unordered_map<std::type_index, std::shared_ptr<IPlayerState>> instances;

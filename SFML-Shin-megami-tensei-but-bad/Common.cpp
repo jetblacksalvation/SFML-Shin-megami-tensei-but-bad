@@ -49,7 +49,6 @@ void Game::run() {
         //draw3DScene(this->worldData.worldObjects, angle, playerPos);
         GameState::playerStateInstance->HandleState();
 
-        window->display();
 
     }
     exit(0);
