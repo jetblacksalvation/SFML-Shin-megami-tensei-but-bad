@@ -3,10 +3,12 @@
 #include "Common.hpp"
 
 #include <fstream> 
+#include <chrono>
+#include <thread>
 
 #include <typeindex>
 #include <format>
-
+#include <chrono>
 #include <SFML/Graphics.hpp>
 #include <memory>
 class IPlayerState;
@@ -90,9 +92,11 @@ public:
     static TGameStateInstance               gameStateInstance;
     static TPlayerState                     playerStateInstance; 
     static sf::Event event;
-
+    
     static bool keys[6];
     static float angle; 
+
+
     GameState();
 
 
@@ -102,21 +106,21 @@ public:
 class IPlayerState: public std::enable_shared_from_this<IPlayerState> {
 public:
 	//variables 
+    bool blockInput = false;
 
     IPlayerState() {
         isLoaded = false;
     };
 
     virtual ~IPlayerState() = default;
-
+     
 	virtual void HandleState() {
 		static_assert("ERR: This object has no defined virtual override for HanldeState!\n");
 	}
 
     virtual void OnLoad() {
-        
-        throw std::runtime_error("Undefined overload for IPlayerState");
-        std::cout << "wrong one1\n";
+        static_assert("ERR: This object has no defined virtual override for OnLoad!\n");
+
     };
     bool isLoaded;
     
@@ -132,6 +136,14 @@ public:
     sf::Vector2f playerPos = { 0,0 };
     sf::Texture texture;
     sf::Sprite sprite;
+
+    std::chrono::steady_clock::time_point buffer; //when you dont want things to constantly check...
+
+    sf::Keyboard lastKey; 
+
+    float offset = (float)M_PI / 4.F;
+    int faceIndex = 0;
+    float faces[4] = { 0 + offset, ((float)M_PI / 2) + offset, ((float)M_PI) + offset, 3 * ((float)M_PI / 2) + offset};
 
     class gridWorld {
     public: 

@@ -29,7 +29,7 @@ Game::Game() {
 }
 void Game::run() {
     //WorldHelper::T_PrimitiveShape points({ sf::Vector2f{-50,50}, sf::Vector2f{50, 50}, sf::Vector2f{-50,50 }, sf::Vector2f{-50,150},  sf::Vector2f{50,150},sf::Vector2f{50,50 } });//last index is so that lines can wrap back to start 
-    (*window).setFramerateLimit(120);
+    (*window).setFramerateLimit(60);
     //square 
 
 

@@ -14,8 +14,7 @@ MenuState::MenuState() {
 }
 void MenuState::HandleState() {
     //std::cout << "menu state active\n";
-    
-    auto& angle = GameState::gameStateInstance->angle;
+     auto& angle = GameState::gameStateInstance->angle;
     auto& window = Game::gameInstance->window;
     auto& worldData = Game::gameInstance->worldData;
 
@@ -30,8 +29,11 @@ void MenuState::HandleState() {
             //PlayerStateRegistrar::PrintInfo();
 		}
 
-        GameState::gameStateInstance->keys[UP] = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-        GameState::gameStateInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+        GameState::gameStateInstance->keys[UP]        = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        GameState::gameStateInstance->keys[LEFT]      = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        GameState::gameStateInstance->keys[DOWN]      = sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+        GameState::gameStateInstance->keys[RIGHT]     = sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        GameState::gameStateInstance->keys[ROT_LEFT]  = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
         GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
         
 

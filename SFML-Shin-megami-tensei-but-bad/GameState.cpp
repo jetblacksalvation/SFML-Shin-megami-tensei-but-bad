@@ -94,20 +94,25 @@ RoamingState::RoamingState()  {
     OnLoad(); 
 }
 void RoamingState::HandleState() {
-   
 
     //std::cout << allWorldShapes.size() << " is size\n";
 
     //std::cout << "The P_angle = " << GameState::gameStateInstance->angle << std::endl; 
     //std::cout << RoamingState::ppos.x << ", " << RoamingState::ppos.y << "\n";
-    while (Game::gameInstance->window->pollEvent(GameState::event)) {      
+    const std::clock_t c_start = std::clock();
+    ;
+    std::chrono::steady_clock::time_point t_start = std::chrono::high_resolution_clock::now();
+
+    // do something
+
+    while (Game::gameInstance->window->pollEvent(GameState::event) &&!this->blockInput) {      
         if (GameState::event.type == GameState::event.Closed) {
             std::cout << "Closing\n"; 
             Game::gameInstance->window->close();
             abort();
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::O)) {
-            std::cout << "Set PPos\n";
+            std::cout << "ECHO PPOS\n";
             std::cout << "current pos = " << playerPos.x << ", " << playerPos.y << std::endl; 
             std::cin >> playerPos.x;
             std::cin >> playerPos.y;
@@ -118,13 +123,52 @@ void RoamingState::HandleState() {
             PlayerStateRegistrar::HandleChangeState<MenuState>();
             return;
         }
+        //GameState::gameStateInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+        //GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+        //GameState::gameStateInstance->keys[ROT_LEFT] = ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::E));
+        //GameState::gameStateInstance->keys[ROT_LEFT] = ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::E));
 
-        GameState::gameStateInstance->keys[UP]        = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-        GameState::gameStateInstance->keys[ROT_LEFT]  = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+        //GameState::gameStateInstance->keys[ROT_RIGHT] = ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::Q));
+        
         GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
+        GameState::gameStateInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
+
+
+        //if ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::E)) {
+        //    (this->faceIndex - 1 < 0) ? faceIndex = 3 : this->faceIndex--;
+        //    //if (this->faceIndex - 1 < 0) {
+        //    //    this->faceIndex = 3;
+        //    //}
+        //    //else {
+        //    //    this->faceIndex--;
+        //    //}
+        //}
+        //if ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::Q)) {
+        //    (this->faceIndex + 1 > 3) ? faceIndex = 0 : faceIndex++;
+
+        //}
+        GameState::gameStateInstance->keys[UP] = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        GameState::gameStateInstance->keys[LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        GameState::gameStateInstance->keys[DOWN] = sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+        GameState::gameStateInstance->keys[RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+
+        const std::clock_t c_end = std::clock();
+        //const auto t_end = std::chrono::high_resolution_clock::now();
+
+        //auto deltaTime = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+        //if (GameState::gameStateInstance->keys[ROT_LEFT]) {
+        //  
+        //    //(this->faceIndex - 1 < 0) ? faceIndex-- : faceIndex = 3;
+        //}
+        //if (GameState::gameStateInstance->keys[ROT_RIGHT]) {
+
+        //}
 
 
     }
+    //float offset = M_PI / 4;
+    //int face = 0;
+    //float faces[4] = { 0 + offset, (M_PI / 2) + offset, (M_PI)+offset, 3 * (M_PI / 2) + offset };
     if (GameState::gameStateInstance->keys[UP]) {
 
         //this handles rotations, for the game world. this works by using the player as the center of the transformation ... 
@@ -137,11 +181,24 @@ void RoamingState::HandleState() {
         //    }
         //}
     }
+    //offset anlge by M_PI 
+
     if (GameState::gameStateInstance->keys[ROT_LEFT]) {
-        GameState::gameStateInstance->angle -= 0.05;
+        (this->faceIndex - 1 < 0) ? faceIndex = 3 : this->faceIndex--;
+
     }
-    if (GameState::gameStateInstance->keys[ROT_RIGHT]) {
-        GameState::gameStateInstance->angle += 0.05;
+    if (GameState::gameStateInstance->keys[ROT_RIGHT]){
+    
+        (this->faceIndex + 1 > 3) ? faceIndex = 0 : faceIndex++;
+        //delta of this 
+    }
+    if (GameState::gameStateInstance->keys[ROT_LEFT] || GameState::gameStateInstance->keys[ROT_RIGHT]) {
+        float delta = (faces[faceIndex] - GameState::gameStateInstance->angle)/2;
+        GameState::gameStateInstance->angle += delta; 
+        draw3DScene();
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        //a little smother feeling way of turning the character... 
+
     }
     if (GameState::gameStateInstance->angle < 0.0) {
         GameState::gameStateInstance->angle += 2 * M_PI;
@@ -149,7 +206,10 @@ void RoamingState::HandleState() {
     else if (GameState::gameStateInstance->angle >= 2 * M_PI) {
         GameState::gameStateInstance->angle -= 2 * M_PI;
     }
+    std::cout << faceIndex << " : " << GameState::gameStateInstance->angle << std::endl;;
 	//std::cout << "IN ROAMING\n";
+    GameState::gameStateInstance->angle = faces[faceIndex];
+
     draw3DScene();
     
 }
