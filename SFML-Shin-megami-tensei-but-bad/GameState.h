@@ -56,11 +56,13 @@ public:
         try {
 
             std::shared_ptr<IPlayerState> v  = PlayerStateRegistrar::getInstance<T>();
+
             GameState::playerStateInstance = v;
 
         }
         catch (...) {
             PlayerStateRegistrar::registerInstance(std::make_shared<T>());
+            std::cout << "Registered " << typeid(T).name() << std::endl; 
             GameState::playerStateInstance = instances[typeid(T)];
         }
 
@@ -134,10 +136,11 @@ class RoamingState : public IPlayerState {
 public:
     RoamingState();
     sf::Vector2f playerPos = { 0,0 };
+    sf::Vector2<uint32_t> gridPos = {3,1 };
+    //grid position is used to set playerPos... cry about it because its bad. not enough that i remove it though :P
     sf::Texture texture;
     sf::Sprite sprite;
 
-    std::chrono::steady_clock::time_point buffer; //when you dont want things to constantly check...
 
     sf::Keyboard lastKey; 
 
@@ -145,21 +148,26 @@ public:
     int faceIndex = 0;
     float faces[4] = { 0 + offset, ((float)M_PI / 2) + offset, ((float)M_PI) + offset, 3 * ((float)M_PI / 2) + offset};
 
-    class gridWorld {
+    class GridHelper {
     public: 
-        gridWorld();
-        gridWorld(std::ifstream);
+        GridHelper() {};
+        GridHelper(RoamingState*);
+        GridHelper(std::ifstream);
+        void gridToWorld(); //loads datas into world... 
+        std::vector<std::vector<int>> gridData; 
         
-        void setGrid(int x, int y); 
-
-        std::vector<int> getGrid();
+        void loadGrid();
 
 
     private:
         std::vector<int> gridValues; 
     };
-    gridWorld gridData;
+    GridHelper gridData;
 
+    void setGridPos(const sf::Vector2<uint32_t>&&);
+    void setGridPos(const sf::Vector2<uint32_t>&);
+
+    void MovePlayer();
     void HandleState();
     void OnLoad() ;
     void draw3DScene();

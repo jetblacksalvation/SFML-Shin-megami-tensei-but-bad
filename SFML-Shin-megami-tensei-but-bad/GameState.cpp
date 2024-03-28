@@ -10,67 +10,24 @@ float                         GameState::angle;
 
 sf::Event                     GameState::event;
 //funcs 
+void RoamingState::setGridPos(const sf::Vector2<uint32_t>&& vec) {
+    setGridPos(vec);
+};
+void RoamingState::setGridPos(const sf::Vector2<uint32_t>& vec) {
+    this->gridPos = (sf::Vector2u) vec;
+    playerPos = sf::Vector2f{ ((float)(vec.x)*100 )+100,((float)(vec.y )*100 )+200};
 
+};
 
 void RoamingState::OnLoad() {
-    if (isLoaded == true) { return; }
-    if (Game::gameInstance->worldData.worldObjects.size() > 3) {
-        return;
-    }
-    std::cout << "is loaded!\n";
-    WorldHelper::T_PrimitiveShape points({ sf::Vector2f{-50,50}, sf::Vector2f{50, 50}, sf::Vector2f{-50,50 }, sf::Vector2f{-50,150},  sf::Vector2f{50,150},sf::Vector2f{50,50 } });//last index is so that lines can wrap back to start 
+    setGridPos({ 1,2 });
     //offset each point via player offset in world array
 
     windowSize = Game::gameInstance->window->getSize(); 
-    int worldData[3][8] = {
-        {1,1,1,1,1,1,1},
-        {1,2,0,0,0,0,1},
-        {1,1,1,1,1,1,1}
 
-    };
     //a scale factor of ten seems to work ?
 
-    const int scaleFactor = 100; 
-    WorldHelper::T_WorldObjects& allWorldShapes = Game::gameInstance->worldData.worldObjects;
-    std::cout << "Populating world...\n";
-    //my stupid ahh, if x=0 the walls would be screwed up. so i have magic number here to offset when needed, and it starts at 1 so calcs dont get fucked 
-
-    int vertexCount = 0;
-    for (int x = 1; x <= 3; x++) {
-        for (int y = 1; y <= 8; y++) {
-            WorldHelper::T_PrimitiveShape temp;
-
-            for (auto point : points) {
-
-                if (worldData[x-1][y-1] == 1) {
-                    //((x - LoaderInstance.PlayerPosition[0]) * 2, (y - LoaderInstance.PlayerPosition[1]) * 2)
-                    if (x == 0) {
-                        point.x *= scaleFactor; 
-                    }
-                    if (y == 0) {
-                        point.y *= scaleFactor;
-                    }
-                    temp.push_back({ point.x + ((x )) *scaleFactor, point.y + ((y ) *scaleFactor) });
-
-                    //std::cout << x << ": " << point.x + ((x) *scaleFactor) << ", " << point.y + ((y) *scaleFactor) <<" OBJECT" << std::endl;
-                }
-                if (worldData[x-1][y-1] == 2) {
-                    std::cout << x << ", " << y << std::endl; 
-                    playerPos = sf::Vector2f{ (float)(x) * scaleFactor,(float) (y+1) * scaleFactor };
-                }
-
-            }
-            if (temp.size() > 0) {
-                vertexCount++;
-
-                //std::cout << vertexCount << " has a size of " << temp.size() << std::endl;
-                allWorldShapes.push_back(temp);
-
-            }
-        }
-    }
-    isLoaded = true; 
-    std::cout << allWorldShapes.size() << ", is the size at end of funct\n";
+   
 }
 
 GameState::GameState() {
@@ -86,13 +43,46 @@ GameState::GameState() {
     PlayerStateRegistrar::HandleChangeState<RoamingState>();
     //GameState::playerStateInstance = PlayerStateRegistrar::getInstance<RoamingState>();
 }
-RoamingState::RoamingState()  {
+RoamingState::RoamingState() {
     std::cout << "Roaming State Instantiated!\n";
+    gridData = GridHelper(this);
 
     texture.loadFromFile("brickWall.png");
     sprite.setTexture(texture);
     OnLoad(); 
 }
+void RoamingState::MovePlayer() {
+    std::cout << faceIndex << " is face index\n";
+
+    sf::Vector2u newPosition = gridPos;
+
+    switch (faceIndex) {
+    case 0:
+        newPosition.y += 1;
+        break;
+    case 1:
+        newPosition.x -= 1;
+        newPosition.y -= 1;
+        break;
+    case 2:
+        newPosition.y -= 1;
+        break;
+    case 3:
+        newPosition.x += 1;
+        break;
+    default:
+        std::cerr << "Invalid face index\n";
+        return;
+    }
+
+    if (newPosition.x < gridData.gridData.size() && newPosition.y < gridData.gridData[newPosition.x].size()) {
+        if (gridData.gridData[newPosition.x][newPosition.y] == 0) {
+            setGridPos(newPosition);
+        }
+    }
+}
+
+
 void RoamingState::HandleState() {
 
     //std::cout << allWorldShapes.size() << " is size\n";
@@ -100,7 +90,7 @@ void RoamingState::HandleState() {
     //std::cout << "The P_angle = " << GameState::gameStateInstance->angle << std::endl; 
     //std::cout << RoamingState::ppos.x << ", " << RoamingState::ppos.y << "\n";
     const std::clock_t c_start = std::clock();
-    ;
+    
     std::chrono::steady_clock::time_point t_start = std::chrono::high_resolution_clock::now();
 
     // do something
@@ -123,46 +113,18 @@ void RoamingState::HandleState() {
             PlayerStateRegistrar::HandleChangeState<MenuState>();
             return;
         }
-        //GameState::gameStateInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
-        //GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
-        //GameState::gameStateInstance->keys[ROT_LEFT] = ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::E));
-        //GameState::gameStateInstance->keys[ROT_LEFT] = ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::E));
 
-        //GameState::gameStateInstance->keys[ROT_RIGHT] = ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::Q));
         
         GameState::gameStateInstance->keys[ROT_RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::E);
         GameState::gameStateInstance->keys[ROT_LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::Q);
 
 
-        //if ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::E)) {
-        //    (this->faceIndex - 1 < 0) ? faceIndex = 3 : this->faceIndex--;
-        //    //if (this->faceIndex - 1 < 0) {
-        //    //    this->faceIndex = 3;
-        //    //}
-        //    //else {
-        //    //    this->faceIndex--;
-        //    //}
-        //}
-        //if ((GameState::event.type == sf::Event::KeyPressed) && (GameState::event.key.code == sf::Keyboard::Key::Q)) {
-        //    (this->faceIndex + 1 > 3) ? faceIndex = 0 : faceIndex++;
-
-        //}
         GameState::gameStateInstance->keys[UP] = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
         GameState::gameStateInstance->keys[LEFT] = sf::Keyboard::isKeyPressed(sf::Keyboard::A);
         GameState::gameStateInstance->keys[DOWN] = sf::Keyboard::isKeyPressed(sf::Keyboard::S);
         GameState::gameStateInstance->keys[RIGHT] = sf::Keyboard::isKeyPressed(sf::Keyboard::D);
 
-        const std::clock_t c_end = std::clock();
-        //const auto t_end = std::chrono::high_resolution_clock::now();
 
-        //auto deltaTime = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-        //if (GameState::gameStateInstance->keys[ROT_LEFT]) {
-        //  
-        //    //(this->faceIndex - 1 < 0) ? faceIndex-- : faceIndex = 3;
-        //}
-        //if (GameState::gameStateInstance->keys[ROT_RIGHT]) {
-
-        //}
 
 
     }
@@ -170,16 +132,19 @@ void RoamingState::HandleState() {
     //int face = 0;
     //float faces[4] = { 0 + offset, (M_PI / 2) + offset, (M_PI)+offset, 3 * (M_PI / 2) + offset };
     if (GameState::gameStateInstance->keys[UP]) {
+        std::cout << gridPos.x << ", " << gridPos.y << std::endl;
+
+        std::cout << "max = " << gridData.gridData.size() << ", " << gridData.gridData[gridPos.x].size() << std::endl; 
+        std::cout << "facesIndex :" << faces[faceIndex] << std::endl;
+
+        //PlayerStateRegistrar::HandleChangeState<MenuState>();
+
+        MovePlayer();
+
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
         //this handles rotations, for the game world. this works by using the player as the center of the transformation ... 
-
-        //for (auto& it : Game::gameInstance->worldData.worldObjects) {
-        //    for (auto& vec : it) {
-        //        //increase 
-        //        vec.x += cosf(GameState::gameStateInstance->angle - M_PI + (M_PI / 4)) * 5.0f;
-        //        vec.y += sinf(GameState::gameStateInstance->angle - M_PI + (M_PI / 4)) * 5.0f;
-        //    }
-        //}
     }
     //offset anlge by M_PI 
 
@@ -192,6 +157,8 @@ void RoamingState::HandleState() {
         (this->faceIndex + 1 > 3) ? faceIndex = 0 : faceIndex++;
         //delta of this 
     }
+    std::cout << "INDEX = " << faceIndex << std::endl;
+
     if (GameState::gameStateInstance->keys[ROT_LEFT] || GameState::gameStateInstance->keys[ROT_RIGHT]) {
         float delta = (faces[faceIndex] - GameState::gameStateInstance->angle)/2;
         GameState::gameStateInstance->angle += delta; 
@@ -206,9 +173,9 @@ void RoamingState::HandleState() {
     else if (GameState::gameStateInstance->angle >= 2 * M_PI) {
         GameState::gameStateInstance->angle -= 2 * M_PI;
     }
-    std::cout << faceIndex << " : " << GameState::gameStateInstance->angle << std::endl;;
 	//std::cout << "IN ROAMING\n";
     GameState::gameStateInstance->angle = faces[faceIndex];
+
 
     draw3DScene();
     
@@ -221,15 +188,7 @@ void RoamingState::draw3DScene() {
     Game::TWindowPtr& window = game.window;
     //std::cout << playerPos.x << ", " << playerPos.y << std::endl;;
 
-
-    /*
-        Eventually add in tiling data.
-        Map should be 2d array, so yk world shapes should reflect that eventually
-
-    */
-
-
-    int rayNum = 90;
+    int rayNum = 100;
     auto angle = GameState::gameStateInstance->angle;
 
     for (int i = 0; i <= rayNum; ++i) { // assuming angles are in degrees

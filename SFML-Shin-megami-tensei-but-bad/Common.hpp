@@ -27,6 +27,8 @@ public:
 	static  TWindowPtr window;
 	WorldHelper worldData; 
 	static TGameInstance gameInstance; // helper obj, its so that game state can grab whatever is needed.
+	sf::Vector2i mousePos;
+
 	//functions
 	Game();
 	void run();
